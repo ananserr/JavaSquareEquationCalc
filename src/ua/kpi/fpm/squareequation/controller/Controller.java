@@ -11,9 +11,14 @@ import ua.kpi.fpm.squareequation.view.View;
 public class Controller {
 
     // Constants
-    public static final int A = 3;
-    public static final int B = 4;
-    public static final int C = 5;
+//    public static final int A = 3;
+//    public static final int B = 4;
+//    public static final int C = 5;
+    public static final int NUMBER_OF_COEFFICIENTS = 3;
+    public static final int COEF_A_INDEX = 0;
+    public static final int COEF_B_INDEX = 1;
+    public static final int COEF_C_INDEX = 2;
+    public static final double DISCRIMINANT_ACCURACY = 1e-10;
 
     // Constructor
     Model model;
@@ -26,37 +31,42 @@ public class Controller {
 
     // The Work method
     public void solveEquation(){
-        //Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
+        model.setCoefficients(inputIntCoefficientsWithScanner(sc));
 
-        if(coefficientsAreValid(A, B, C)) {
-            model.setD(A, B, C);
-            if(hasRoots(A, B, C)) {
-                model.findRoots(A, B, C);
-                outputResults(A, B, C, model.getRoots());
-            }
+        if (model.hasRoots()) {
+            view.printCoefsAndArray(View.COEFS_OUTPUT_FORMAT, model.getA(), model.getB(), model.getC(),
+                    model.findRoots());
+        } else {
+            view.printMessage(View.HAS_NO_ROOT);
         }
     }
 
     // The Utility methods
-    public boolean coefficientsAreValid(int a, int b, int c) {
-        if(a == 0) {
-            // check if not int or A=0
-            view.printMessage(View.COEFS_NOT_VALID);
-            return false;
-        } else {
-            return true;
+
+    public int[] inputIntCoefficientsWithScanner(Scanner sc) {
+        int[] coefs = new int[NUMBER_OF_COEFFICIENTS];
+
+        /* Check if A coefficient is equal zero. In this case the equation is not square. */
+        while ((coefs[COEF_A_INDEX] = inputIntValueWithScanner(sc, View.INPUT_INT_A)) == 0) {
+            view.printMessage(View.WRONG_A_COEF);
         }
+
+        coefs[COEF_B_INDEX] = inputIntValueWithScanner(sc, View.INPUT_INT_B);
+        coefs[COEF_C_INDEX] = inputIntValueWithScanner(sc, View.INPUT_INT_C);
+
+        return coefs;
     }
 
-    public boolean hasRoots(int a, int b, int c) {
-        if(model.getD() < 0 || b == 0 && -c/a < 0) {
-            view.printMessage(View.HAS_NO_ROOT);
-            return false;
-        } else {
-            return true;
+    public int inputIntValueWithScanner(Scanner sc, String message) {
+        view.printMessage(message);
+
+        // check int - value
+        while (!sc.hasNextInt()) {
+            view.printMessage(View.WRONG_INPUT_INT_DATA);
+            sc.next();
         }
-    }
-    public void outputResults(int a, int b, int c, double[] roots) {
-        view.printCoefsAndArray(View.COEFS_OUTPUT_FORMAT, a, b, c, roots);
+
+        return sc.nextInt();
     }
 }
